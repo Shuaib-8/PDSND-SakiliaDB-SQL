@@ -1,4 +1,4 @@
-/* Query 1 - which countries did customers purchase the the most DVD rental */
+/* Query 1 - which countries did customers purchase the the most DVD rental (Top 10) */
 
 SELECT country AS country_name, SUM(payment.amount) AS payment_amount
 FROM customer
@@ -10,14 +10,16 @@ JOIN city
 ON city.city_id = address.city_id
 JOIN country
 ON country.country_id = city.country_id
-WHERE NOT country IN ('Runion')
+WHERE country != 'Runion'
 GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 10;
 
 /* Query 2 - The average film length per actor */
+-- CTE to manipulate table in specified way
 
-WITH t1 AS (SELECT actor.first_name, actor.last_name, first_name || ' ' || last_name AS 	    actor_name, film.length AS film_length
+WITH t1 AS (SELECT actor.first_name, actor.last_name, first_name || ' ' || last_name AS actor_name, 
+			film.length AS film_length
             FROM film
             JOIN film_actor
             ON film_actor.film_id = film.film_id
@@ -30,6 +32,7 @@ GROUP BY 1
 ORDER BY 2 DESC;
 
 /* Query 3 - DVD rentals by the number of rentals for payment levels for each store: inexpensive, affordable, expensive */
+-- Window function, subquery within from and CASE WHEN statement to group payments into finite groups (categories)
 
 SELECT DISTINCT(payment_levels), store_id,
                 COUNT(amount) OVER(PARTITION BY payment_levels ORDER BY store_id DESC) AS Paymentcount_bypaymentgroups
